@@ -3,5 +3,5 @@
     "configuration": "cpu=atmega328",
     "board": "arduino:avr:nano",
     "programmer": "avrispmkii",
-    "sketch": "balacing_robot.ino"
+    "sketch": "balancing_robot.ino"
 }

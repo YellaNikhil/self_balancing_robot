@@ -34,11 +34,11 @@ int gyro_address = 0x68;                                     //MPU-6050 I2C addr
 int acc_calibration_value = -7950; 
 
 //Various settings
-float pid_p_gain = 15;                                       //Gain setting for the P-controller (15)
-float pid_i_gain = 1.5;                                      //Gain setting for the I-controller (1.5)
-float pid_d_gain = 30;                                       //Gain setting for the D-controller (30)
-float turning_speed = 30;                                    //Turning speed (20)
-float max_target_speed = 150;                                //Max target speed (100)
+float pid_p_gain = 15;                                       // Gain setting for the P-controller (15)
+float pid_i_gain = 1.5;                                      // Gain setting for the I-controller (1.5)
+float pid_d_gain = 30;                                       // Gain setting for the D-controller (30)
+float turning_speed = 30;                                    // Turning speed (20)
+float max_target_speed = 150;                                // Max target speed (100)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Declaring global variables
@@ -69,12 +69,12 @@ void setup(){
 
   //To create a variable pulse for controlling the stepper motors a timer is created that will execute a piece of code (subroutine) every 20us
   //This subroutine is called TIMER2_COMPA_vect
-  TCCR2A = 0;                                                               //Make sure that the TCCR2A register is set to zero
-  TCCR2B = 0;                                                               //Make sure that the TCCR2A register is set to zero
-  TIMSK2 |= (1 << OCIE2A);                                                  //Set the interupt enable bit OCIE2A in the TIMSK2 register
-  TCCR2B |= (1 << CS21);                                                    //Set the CS21 bit in the TCCRB register to set the prescaler to 8
-  OCR2A = 39;                                                               //The compare register is set to 39 => 20us / (1s / (16.000.000MHz / 8)) - 1
-  TCCR2A |= (1 << WGM21);                                                   //Set counter 2 to CTC (clear timer on compare) mode
+  // TCCR2A = 0;                                                               //Make sure that the TCCR2A register is set to zero
+  // TCCR2B = 0;                                                               //Make sure that the TCCR2A register is set to zero
+  // TIMSK2 |= (1 << OCIE2A);                                                  //Set the interupt enable bit OCIE2A in the TIMSK2 register
+  // TCCR2B |= (1 << CS21);                                                    //Set the CS21 bit in the TCCRB register to set the prescaler to 8
+  // OCR2A = 39;                                                               //The compare register is set to 39 => 20us / (1s / (16.000.000MHz / 8)) - 1
+  // TCCR2A |= (1 << WGM21);                                                   //Set counter 2 to CTC (clear timer on compare) mode
   
   //By default the MPU-6050 sleeps. So we have to wake it up.
   Wire.beginTransmission(gyro_address);                                     //Start communication with the address found during search.
@@ -116,20 +116,21 @@ void setup(){
   pinMode(ECHO_PIN, INPUT);
 
   digitalWrite(STBY_PIN, HIGH);
-  for(receive_counter = 0; receive_counter < 500; receive_counter++){       //Create 500 loops
-    // if(receive_counter % 15 == 0)digitalWrite(13, !digitalRead(13));        //Change the state of the LED every 15 loops to make the LED blink fast
-    Wire.beginTransmission(gyro_address);                                   //Start communication with the gyro
-    Wire.write(0x43);                                                       //Start reading the Who_am_I register 75h
-    Wire.endTransmission();                                                 //End the transmission
-    Wire.requestFrom(gyro_address, 6);                                      //Request 2 bytes from the gyro
-    gyro_pitch_calibration_value += Wire.read()<<8|Wire.read();               //Combine the two bytes to make one integer, x - axis would act as pitch
-    gyro_roll_calibration_value += Wire.read()<<8|Wire.read();             //Combine the two bytes to make one integer, y - axis would act as roll
-    gyro_yaw_calibration_value += Wire.read() << 8 | Wire.read();           // Combine the two bytes to make one integer, z - axis would act as yaw
-    delayMicroseconds(3700);                                                //Wait for 3700 microseconds to simulate the main program loop time
-  }
-  gyro_pitch_calibration_value /= 500;                                      //Divide the total value by 500 to get the avarage gyro offset
-  gyro_yaw_calibration_value /= 500;                                        //Divide the total value by 500 to get the avarage gyro offset
+  // for(receive_counter = 0; receive_counter < 500; receive_counter++){       //Create 500 loops
+  //   // if(receive_counter % 15 == 0)digitalWrite(13, !digitalRead(13));        //Change the state of the LED every 15 loops to make the LED blink fast
+  //   Wire.beginTransmission(gyro_address);                                   //Start communication with the gyro
+  //   Wire.write(0x43);                                                       //Start reading the Who_am_I register 75h
+  //   Wire.endTransmission();                                                 //End the transmission
+  //   Wire.requestFrom(gyro_address, 6);                                      //Request 2 bytes from the gyro
+  //   gyro_pitch_calibration_value += Wire.read()<<8|Wire.read();               //Combine the two bytes to make one integer, x - axis would act as pitch
+  //   gyro_roll_calibration_value += Wire.read()<<8|Wire.read();             //Combine the two bytes to make one integer, y - axis would act as roll
+  //   gyro_yaw_calibration_value += Wire.read() << 8 | Wire.read();           // Combine the two bytes to make one integer, z - axis would act as yaw
+  //   delayMicroseconds(3700);                                                //Wait for 3700 microseconds to simulate the main program loop time
+  // }
+  // gyro_pitch_calibration_value /= 500;                                      //Divide the total value by 500 to get the avarage gyro offset
+  // gyro_yaw_calibration_value /= 500;                                        //Divide the total value by 500 to get the avarage gyro offset
 
+  Serial.println("setup Done");
   loop_timer = micros() + 4000;                                             //Set the loop_timer variable at the next end loop time
 
 }
@@ -193,44 +194,43 @@ void loop(){
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Interrupt routine  TIMER2_COMPA_vect
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-ISR(TIMER2_COMPA_vect){
-  //Left motor pulse calculations
-  // throttle_counter_left_motor ++;                                           //Increase the throttle_counter_left_motor variable by 1 every time this routine is executed
-  // if(throttle_counter_left_motor > throttle_left_motor_memory){             //If the number of loops is larger then the throttle_left_motor_memory variable
-  //   throttle_counter_left_motor = 0;                                        //Reset the throttle_counter_left_motor variable
-  //   throttle_left_motor_memory = throttle_left_motor;                       //Load the next throttle_left_motor variable
-  //   if(throttle_left_motor_memory < 0){                                     //If the throttle_left_motor_memory is negative
-  //     PORTD &= 0b11110111;                                                  //Set output 3 low to reverse the direction of the stepper controller
-  //     throttle_left_motor_memory *= -1;                                     //Invert the throttle_left_motor_memory variable
-  //   }
-  //   else PORTD |= 0b00001000;                                               //Set output 3 high for a forward direction of the stepper motor
-  // }
-  // else if(throttle_counter_left_motor == 1)PORTD |= 0b00000100;             //Set output 2 high to create a pulse for the stepper controller
-  // else if(throttle_counter_left_motor == 2)PORTD &= 0b11111011;             //Set output 2 low because the pulse only has to last for 20us 
+// ISR(TIMER2_COMPA_vect){
+//   //Left motor pulse calculations
+//   // throttle_counter_left_motor ++;                                           //Increase the throttle_counter_left_motor variable by 1 every time this routine is executed
+//   // if(throttle_counter_left_motor > throttle_left_motor_memory){             //If the number of loops is larger then the throttle_left_motor_memory variable
+//   //   throttle_counter_left_motor = 0;                                        //Reset the throttle_counter_left_motor variable
+//   //   throttle_left_motor_memory = throttle_left_motor;                       //Load the next throttle_left_motor variable
+//   //   if(throttle_left_motor_memory < 0){                                     //If the throttle_left_motor_memory is negative
+//   //     PORTD &= 0b11110111;                                                  //Set output 3 low to reverse the direction of the stepper controller
+//   //     throttle_left_motor_memory *= -1;                                     //Invert the throttle_left_motor_memory variable
+//   //   }
+//   //   else PORTD |= 0b00001000;                                               //Set output 3 high for a forward direction of the stepper motor
+//   // }
+//   // else if(throttle_counter_left_motor == 1)PORTD |= 0b00000100;             //Set output 2 high to create a pulse for the stepper controller
+//   // else if(throttle_counter_left_motor == 2)PORTD &= 0b11111011;             //Set output 2 low because the pulse only has to last for 20us 
   
-  // //right motor pulse calculations
-  // throttle_counter_right_motor ++;                                          //Increase the throttle_counter_right_motor variable by 1 every time the routine is executed
-  // if(throttle_counter_right_motor > throttle_right_motor_memory){           //If the number of loops is larger then the throttle_right_motor_memory variable
-  //   throttle_counter_right_motor = 0;                                       //Reset the throttle_counter_right_motor variable
-  //   throttle_right_motor_memory = throttle_right_motor;                     //Load the next throttle_right_motor variable
-  //   if(throttle_right_motor_memory < 0){                                    //If the throttle_right_motor_memory is negative
-  //     PORTD |= 0b00100000;                                                  //Set output 5 low to reverse the direction of the stepper controller
-  //     throttle_right_motor_memory *= -1;                                    //Invert the throttle_right_motor_memory variable
-  //   }
-  //   else PORTD &= 0b11011111;                                               //Set output 5 high for a forward direction of the stepper motor
-  // }
-  // else if(throttle_counter_right_motor == 1)PORTD |= 0b00010000;            //Set output 4 high to create a pulse for the stepper controller
-  // else if(throttle_counter_right_motor == 2)PORTD &= 0b11101111;            //Set output 4 low because the pulse only has to last for 20us
-  if(throttle_left_motor < 0 && throttle_counter_right_motor < 0){
-    throttle_left_motor *= -1;
-    throttle_right_motor *= -1;
-    motor_backward();
-  }
-  else{
-    motor_forward();    
-  }
-  
-}
+//   // //right motor pulse calculations
+//   // throttle_counter_right_motor ++;                                          //Increase the throttle_counter_right_motor variable by 1 every time the routine is executed
+//   // if(throttle_counter_right_motor > throttle_right_motor_memory){           //If the number of loops is larger then the throttle_right_motor_memory variable
+//   //   throttle_counter_right_motor = 0;                                       //Reset the throttle_counter_right_motor variable
+//   //   throttle_right_motor_memory = throttle_right_motor;                     //Load the next throttle_right_motor variable
+//   //   if(throttle_right_motor_memory < 0){                                    //If the throttle_right_motor_memory is negative
+//   //     PORTD |= 0b00100000;                                                  //Set output 5 low to reverse the direction of the stepper controller
+//   //     throttle_right_motor_memory *= -1;                                    //Invert the throttle_right_motor_memory variable
+//   //   }
+//   //   else PORTD &= 0b11011111;                                               //Set output 5 high for a forward direction of the stepper motor
+//   // }
+//   // else if(throttle_counter_right_motor == 1)PORTD |= 0b00010000;            //Set output 4 high to create a pulse for the stepper controller
+//   // else if(throttle_counter_right_motor == 2)PORTD &= 0b11101111;            //Set output 4 low because the pulse only has to last for 20us
+//   if(throttle_left_motor < 0 && throttle_counter_right_motor < 0){
+//     throttle_left_motor *= -1;
+//     throttle_right_motor *= -1;
+//     motor_backward();
+//   }
+//   else{
+//     motor_forward();    
+//   }
+// }
 
 void get_bluetooth_data(){
  if(Serial.available()){                                                   //If there is serial data available
@@ -278,9 +278,10 @@ void get_imu_values(){
 
   gyro_yaw_data_raw -= gyro_yaw_calibration_value;                          //Add the gyro calibration value
   //Uncomment the following line to make the compensation active
-  angle_gyro -= gyro_yaw_data_raw * 0.0000003;                            //Compensate the gyro offset when the robot is rotating
+  // angle_gyro -= gyro_yaw_data_raw * 0.0000003;                            //Compensate the gyro offset when the robot is rotating
 
   angle_gyro = angle_gyro * 0.9996 + angle_acc * 0.0004;                    //Correct the drift of the gyro angle with the accelerometer angle
+  // Serial.println(angle_gyro);
 }
 
 void get_pid_values(){
@@ -291,12 +292,12 @@ void get_pid_values(){
   if(pid_output > 10 || pid_output < -10)pid_error_temp += pid_output * 0.015 ;
 
   pid_i_mem += pid_i_gain * pid_error_temp;                                 //Calculate the I-controller value and add it to the pid_i_mem variable
-  if(pid_i_mem > 400)pid_i_mem = 400;                                       //Limit the I-controller to the maximum controller output
-  else if(pid_i_mem < -400)pid_i_mem = -400;
+  if(pid_i_mem > 255)pid_i_mem = 255;                                       //Limit the I-controller to the maximum controller output
+  else if(pid_i_mem < -255)pid_i_mem = -255;
   //Calculate the PID output value
   pid_output = pid_p_gain * pid_error_temp + pid_i_mem + pid_d_gain * (pid_error_temp - pid_last_d_error);
-  if(pid_output > 400)pid_output = 400;                                     //Limit the PI-controller to the maximum controller output
-  else if(pid_output < -400)pid_output = -400;
+  if(pid_output > 255)pid_output = 255;                                     //Limit the PI-controller to the maximum controller output
+  else if(pid_output < -255)pid_output = -255;
 
   pid_last_d_error = pid_error_temp;                                        //Store the error for the next loop
 
@@ -346,24 +347,33 @@ void calculate_controller_values(){
 }
 
 void control_motor_speed(){
-  if(pid_output_left > 0)pid_output_left = 405 - (1/(pid_output_left + 9)) * 5500;
-  else if(pid_output_left < 0)pid_output_left = -405 - (1/(pid_output_left - 9)) * 5500;
+  // if(pid_output_left > 0)pid_output_left = 405 - (1/(pid_output_left + 9)) * 5500;
+  // else if(pid_output_left < 0)pid_output_left = -405 - (1/(pid_output_left - 9)) * 5500;
 
-  if(pid_output_right > 0)pid_output_right = 405 - (1/(pid_output_right + 9)) * 5500;
-  else if(pid_output_right < 0)pid_output_right = -405 - (1/(pid_output_right - 9)) * 5500;
+  // if(pid_output_right > 0)pid_output_right = 405 - (1/(pid_output_right + 9)) * 5500;
+  // else if(pid_output_right < 0)pid_output_right = -405 - (1/(pid_output_right - 9)) * 5500;
 
   //Calculate the needed pulse time for the left and right stepper motor controllers
-  if(pid_output_left > 0)left_motor = 400 - pid_output_left;
-  else if(pid_output_left < 0)left_motor = -400 - pid_output_left;
-  else left_motor = 0;
+  // if(pid_output_left > 0)left_motor = 400 - pid_output_left;
+  // else if(pid_output_left < 0)left_motor = -400 - pid_output_left;
+  // else left_motor = 0;
 
-  if(pid_output_right > 0)right_motor = 400 - pid_output_right;
-  else if(pid_output_right < 0)right_motor = -400 - pid_output_right;
-  else right_motor = 0;
+  // if(pid_output_right > 0)right_motor = 400 - pid_output_right;
+  // else if(pid_output_right < 0)right_motor = -400 - pid_output_right;
+  // else right_motor = 0;
 
   //Copy the pulse time to the throttle variables so the interrupt subroutine can use them
   throttle_left_motor = left_motor;
   throttle_right_motor = right_motor; 
+
+  if(throttle_left_motor < 0 && throttle_right_motor < 0){
+    throttle_left_motor *= -1;
+    throttle_right_motor *= -1;
+    motor_backward();
+  }
+  else{
+    motor_forward();
+  }
 }
 
 /* Stop the both motors */
