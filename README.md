@@ -9,8 +9,9 @@ This project showcases the development of a **self-balancing robot** using an Ar
 - **Hardware Components**:
   - Arduino microcontroller
   - IMU for motion sensing(MPU6050)
-  - Two geared DC motors for torque adjustments
-  - Custom chassis with precision design
+  - GA37-520 dc geared motor
+  - TB6612FNG Dual Motor Driver
+  - Li-ion Battery
 
 ## Project Workflow
 1. **Hardware Assembly**:
@@ -31,6 +32,7 @@ The two-wheeled self-balancing robot successfully achieved:
 - **Stability**: Maintained vertical equilibrium with only angle feedback.
 - **Efficient Control**: Demonstrated precise control using the manually tuned PID controller.
 - **Robust Performance**: The robot performed reliably under various conditions, making it a practical demonstration of balancing control.
+YouTube Video - https://youtu.be/mYMDzSsLv2Q
 
 ## Recommendations for Future Work
 
